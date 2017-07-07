@@ -15,6 +15,7 @@ import java.util.logging.Level;
 import org.eclipse.californium.core.CaliforniumLogger;
 import org.eclipse.californium.core.CoapClient;
 import org.eclipse.californium.core.CoapResponse;
+import org.eclipse.californium.core.coap.MediaTypeRegistry;
 import org.eclipse.californium.core.network.CoapEndpoint;
 import org.eclipse.californium.core.network.config.NetworkConfig;
 import org.eclipse.californium.scandium.DTLSConnector;
@@ -49,6 +50,11 @@ public class Coap {
 	
 	public Coap() {
 		client = new CoapClient();
+	}
+	
+	public Coap(String psk){
+		client = new CoapClient();
+		this.setPsk(psk);
 	}
 	
 	/**
@@ -130,6 +136,52 @@ public class Coap {
 
 		} catch (URISyntaxException e) {
 			System.err.println("[Coap] Invalid URI in Coap.get: " + e.getMessage());
+			System.exit(-1);
+		}
+
+		return response;
+	}
+
+	/**
+	 * Do a Post-Request on a specified URI. The data gets the content type application/json
+	 * @param URI the URL with the coap path. Must start with coap:// or coaps://
+	 * @return The response, null if the request wasn't successfull
+	 */
+	CoapResponse postJSON(String uri, String payload){
+		CoapResponse response = null;
+		try {
+			//construct an URI to check validity
+			@SuppressWarnings("unused")
+			URI temp = new URI(uri);
+			
+			client.setURI(uri);
+			response = client.post(payload, MediaTypeRegistry.APPLICATION_JSON);
+
+		} catch (URISyntaxException e) {
+			System.err.println("[Coap] Invalid URI in Coap.postJSON: " + e.getMessage());
+			System.exit(-1);
+		}
+
+		return response;
+	}
+	
+	/**
+	 * Do a Put-Request on a specified URI. The data gets the content type application/json
+	 * @param URI the URL with the coap path. Must start with coap:// or coaps://
+	 * @return The response, null if the request wasn't successfull
+	 */
+	CoapResponse putJSON(String uri, String payload){
+		CoapResponse response = null;
+		try {
+			//construct an URI to check validity
+			@SuppressWarnings("unused")
+			URI temp = new URI(uri);
+			
+			client.setURI(uri);
+			response = client.put(payload, MediaTypeRegistry.APPLICATION_JSON);
+
+		} catch (URISyntaxException e) {
+			System.err.println("[Coap] Invalid URI in Coap.putJSON: " + e.getMessage());
 			System.exit(-1);
 		}
 

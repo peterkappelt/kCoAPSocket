@@ -83,9 +83,26 @@ public class TcpServerThread implements Runnable {
 								continue;
 							}
 							
-							Coap client = new Coap();
-							client.setPsk(this.serverPSK);
+							Coap client = new Coap(this.serverPSK);
 							String response = client.get(commandParts[1]).getResponseText();
+							writeResponse(clientSocket, response);
+						}else if(Objects.equals(commandParts[0], "coapPostJSON")){
+							if(commandParts.length < 3){
+								System.out.println("[TcpServerThread] Command \"coapPostJSON\" requires two parameter");
+								continue;
+							}
+							
+							Coap client = new Coap(this.serverPSK);
+							String response = client.postJSON(commandParts[1], commandParts[2]).getResponseText();
+							writeResponse(clientSocket, response);
+						}else if(Objects.equals(commandParts[0], "coapPutJSON")){
+							if(commandParts.length < 3){
+								System.out.println("[TcpServerThread] Command \"coapPutJSON\" requires two parameter");
+								continue;
+							}
+							
+							Coap client = new Coap(this.serverPSK);
+							String response = client.putJSON(commandParts[1], commandParts[2]).getResponseText();
 							writeResponse(clientSocket, response);
 						}
 						
