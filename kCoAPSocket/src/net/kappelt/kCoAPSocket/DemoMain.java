@@ -3,9 +3,6 @@
  */
 package net.kappelt.kCoAPSocket;
 
-import org.eclipse.californium.core.CoapResponse;
-import org.eclipse.californium.core.Utils;
-
 /**
  * @author peter
  *
@@ -16,7 +13,7 @@ public class DemoMain {
 		Thread threadHandler = new Thread(new TcpServerThread(505));
 		threadHandler.start();
 		
-		Coap client = new Coap();
+		/*Coap client = new Coap();
 		
 		client.debugOutputDisable();
 		client.setPsk("xxx");
@@ -35,7 +32,7 @@ public class DemoMain {
 		} else {
 			System.out.println("No response received.");
 		}
-		
+		*/
 		//System.exit(0);
 		
 		

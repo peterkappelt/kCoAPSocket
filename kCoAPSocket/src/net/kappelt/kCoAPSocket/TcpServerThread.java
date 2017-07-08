@@ -52,6 +52,11 @@ public class TcpServerThread implements Runnable {
 				Socket clientSocket = socket.accept();
 				System.out.println("[TcpServerThread] Connection at port " + port + " opened");
 
+				/**
+				 * Coap instance
+				 */
+				Coap client = new Coap(this.serverPSK);
+				
 				while (true) {
 					// read data
 					BufferedReader inData = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
@@ -63,47 +68,44 @@ public class TcpServerThread implements Runnable {
 						dataLine.replace("\n", "").replace("\r", "");		//remove newlines, like at the end
 						String[] commandParts = dataLine.split("\\|");		//split the command, separated by "|"
 						
-						if(commandParts.length < 1){
+						if(commandParts.length < 2){
 							System.out.println("[TcpServerThread] Not enough command parts!");
 							continue;
 						}
 						
 						if(Objects.equals(commandParts[0], "ping")){
-							writeResponse(clientSocket, "pong");
+							writeResponse(clientSocket, commandParts[1] + "|pong");
 						}else if(Objects.equals(commandParts[0], "setPSK")){
-							if(commandParts.length < 2){
+							if(commandParts.length < 3){
 								System.out.println("[TcpServerThread] Command \"setPSK\" requires one parameter");
 								continue;
 							}
 							System.out.println("[TcpServerThread] Set PSK to " + commandParts[1]);
-							this.serverPSK = commandParts[1];
+							this.serverPSK = commandParts[2];
 						}else if(Objects.equals(commandParts[0], "coapGet")){
-							if(commandParts.length < 2){
+							if(commandParts.length < 3){
 								System.out.println("[TcpServerThread] Command \"coapGet\" requires one parameter");
 								continue;
 							}
 							
-							Coap client = new Coap(this.serverPSK);
-							String response = client.get(commandParts[1]).getResponseText();
-							writeResponse(clientSocket, response);
+							String response = client.get(commandParts[2]).getResponseText();
+							writeResponse(clientSocket, commandParts[1] + "|" + response);
 						}else if(Objects.equals(commandParts[0], "coapPostJSON")){
-							if(commandParts.length < 3){
-								System.out.println("[TcpServerThread] Command \"coapPostJSON\" requires two parameter");
+							if(commandParts.length < 4){
+								System.out.println("[TcpServerThread] Command \"coapPostJSON\" requires two parameters");
 								continue;
 							}
 							
-							Coap client = new Coap(this.serverPSK);
-							String response = client.postJSON(commandParts[1], commandParts[2]).getResponseText();
-							writeResponse(clientSocket, response);
+							String response = client.postJSON(commandParts[2], commandParts[3]).getResponseText();
+							writeResponse(clientSocket, commandParts[1] + "|" + response);
 						}else if(Objects.equals(commandParts[0], "coapPutJSON")){
 							if(commandParts.length < 3){
-								System.out.println("[TcpServerThread] Command \"coapPutJSON\" requires two parameter");
+								System.out.println("[TcpServerThread] Command \"coapPutJSON\" requires two parameters");
 								continue;
 							}
 							
-							Coap client = new Coap(this.serverPSK);
-							String response = client.putJSON(commandParts[1], commandParts[2]).getResponseText();
-							writeResponse(clientSocket, response);
+							String response = client.putJSON(commandParts[2], commandParts[3]).getResponseText();
+							writeResponse(clientSocket, commandParts[1] + "|" + response);
 						}
 						
 					}
