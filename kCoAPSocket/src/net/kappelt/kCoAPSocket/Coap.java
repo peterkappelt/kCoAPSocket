@@ -17,6 +17,7 @@ import org.eclipse.californium.core.CoapClient;
 import org.eclipse.californium.core.CoapResponse;
 import org.eclipse.californium.core.coap.MediaTypeRegistry;
 import org.eclipse.californium.core.network.CoapEndpoint;
+import org.eclipse.californium.core.network.EndpointManager;
 import org.eclipse.californium.core.network.config.NetworkConfig;
 import org.eclipse.californium.scandium.DTLSConnector;
 import org.eclipse.californium.scandium.ScandiumLogger;
@@ -41,7 +42,7 @@ public class Coap {
 	/**
 	 * DTLS connector, in order to provide security features to CoAP-Classes
 	 */
-	private DTLSConnector dtlsConnector;
+	private DTLSConnector dtlsConnector = null;
 	
 	/**
 	 * The Californium CoAP-Client-Instance itself
@@ -86,6 +87,11 @@ public class Coap {
 	 * @param psk The pre-shared key
 	 */
 	public void setPsk(String psk){
+		if(dtlsConnector != null){
+			client.setEndpoint(EndpointManager.getEndpointManager().getDefaultEndpoint());
+			dtlsConnector.destroy();
+		}
+		
 		try {
 			// load key store
 			KeyStore keyStore = KeyStore.getInstance("JKS");

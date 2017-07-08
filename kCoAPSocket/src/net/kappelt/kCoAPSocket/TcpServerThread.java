@@ -80,14 +80,15 @@ public class TcpServerThread implements Runnable {
 								System.out.println("[TcpServerThread] Command \"setPSK\" requires one parameter");
 								continue;
 							}
-							System.out.println("[TcpServerThread] Set PSK to " + commandParts[1]);
+							System.out.println("[TcpServerThread] Set PSK to " + commandParts[2]);
 							this.serverPSK = commandParts[2];
+							client.setPsk(this.serverPSK);
 						}else if(Objects.equals(commandParts[0], "coapGet")){
 							if(commandParts.length < 3){
 								System.out.println("[TcpServerThread] Command \"coapGet\" requires one parameter");
 								continue;
 							}
-							
+							client.debugOutputEnable();
 							String response = client.get(commandParts[2]).getResponseText();
 							writeResponse(clientSocket, commandParts[1] + "|" + response);
 						}else if(Objects.equals(commandParts[0], "coapPostJSON")){
