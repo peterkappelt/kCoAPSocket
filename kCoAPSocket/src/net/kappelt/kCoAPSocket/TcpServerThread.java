@@ -12,6 +12,9 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Objects;
 
+import org.eclipse.californium.core.CoapHandler;
+import org.eclipse.californium.core.CoapResponse;
+
 /**
  * @author peter
  *
@@ -34,7 +37,7 @@ public class TcpServerThread implements Runnable {
 		}
 		
 		System.out.println("[TcpServerThread] Sending response: " + text);
-		out.println(text);
+		out.println(text + "\r\n");
 	}
 	
 	/* (non-Javadoc)
@@ -88,7 +91,7 @@ public class TcpServerThread implements Runnable {
 								System.out.println("[TcpServerThread] Command \"coapGet\" requires one parameter");
 								continue;
 							}
-							client.debugOutputEnable();
+							
 							String response = client.get(commandParts[1]).getResponseText();
 							writeResponse(clientSocket, response);
 						}else if(Objects.equals(commandParts[0], "coapPostJSON")){
@@ -107,6 +110,23 @@ public class TcpServerThread implements Runnable {
 							
 							String response = client.putJSON(commandParts[1], commandParts[2]).getResponseText();
 							writeResponse(clientSocket, response);
+						}else if(Objects.equals(commandParts[0], "coapObserveStart")){
+							if(commandParts.length < 2){
+								System.out.println("[TcpServerThread] Command \"coapObserveStart\" requires one parameter");
+								continue;
+							}
+							
+							client.observe(commandParts[1], new CoapHandler(){
+								@Override public void onLoad(CoapResponse response){
+									System.out.println("[TcpServerThread] New state for observed resource " + commandParts[1] + ": " + response.getResponseText());
+									writeResponse(clientSocket, "observedUpdate|" + commandParts[1] + "|" + response.getResponseText());
+								}
+								
+								@Override public void onError() {
+									System.err.println("[TcpServerThread] Observing failed");
+								}
+							});
+							
 						}
 						
 					}

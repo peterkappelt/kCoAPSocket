@@ -10,12 +10,17 @@ import java.net.URISyntaxException;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
+import java.util.ArrayList;
 import java.util.logging.Level;
 
 import org.eclipse.californium.core.CaliforniumLogger;
 import org.eclipse.californium.core.CoapClient;
+import org.eclipse.californium.core.CoapHandler;
+import org.eclipse.californium.core.CoapObserveRelation;
 import org.eclipse.californium.core.CoapResponse;
+import org.eclipse.californium.core.coap.CoAP.Code;
 import org.eclipse.californium.core.coap.MediaTypeRegistry;
+import org.eclipse.californium.core.coap.Request;
 import org.eclipse.californium.core.network.CoapEndpoint;
 import org.eclipse.californium.core.network.EndpointManager;
 import org.eclipse.californium.core.network.config.NetworkConfig;
@@ -48,6 +53,11 @@ public class Coap {
 	 * The Californium CoAP-Client-Instance itself
 	 */
 	private CoapClient client;
+	
+	/**
+	 * Observe-actions that were started
+	 */
+	ArrayList<CoapObserveRelation> observedPaths = new ArrayList<CoapObserveRelation>();
 	
 	public Coap() {
 		client = new CoapClient();
@@ -192,6 +202,28 @@ public class Coap {
 		}
 
 		return response;
+	}
+	
+	/**
+	 * start observing, register handler
+	 */
+	void observe(String uri, CoapHandler handler){
+		try{
+			//construct an URI to check validity
+			@SuppressWarnings("unused")
+			URI temp = new URI(uri);
+		}catch(URISyntaxException e){
+			System.err.println("[Coap] Invalid URI in Coap.observe: " + e.getMessage());
+			System.exit(-1);
+		}
+		
+		Request temp = new Request(Code.GET);
+		temp.setURI(uri);
+		temp.setObserve();
+		
+		CoapObserveRelation relation = client.observe(temp, handler);
+		
+		observedPaths.add(relation);
 	}
 
 }
