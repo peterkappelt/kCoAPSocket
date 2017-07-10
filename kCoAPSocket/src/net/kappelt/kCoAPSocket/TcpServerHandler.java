@@ -1,0 +1,135 @@
+/**
+ * 
+ */
+package net.kappelt.kCoAPSocket;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.util.Objects;
+
+import org.eclipse.californium.core.CoapHandler;
+import org.eclipse.californium.core.CoapResponse;
+
+/**
+ * @author peter
+ *
+ */
+public class TcpServerHandler implements Runnable {
+
+	/**
+	 * data for handling
+	 */
+	private Socket clientSocket;
+	private Coap coapClient;
+	
+	/**
+	 * Construct a new Handler
+	 */
+	public TcpServerHandler(Socket clientSocket, Coap coapClient) {
+		this.clientSocket = clientSocket;
+		this.coapClient = coapClient;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Runnable#run()
+	 */
+	@Override
+	public void run() {
+		try{
+			// read data and write data
+			BufferedReader inData = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+			String dataLine = null;
+			
+			PrintWriter outData = new PrintWriter(clientSocket.getOutputStream(), true);
+			
+			//this is used to stop the thread, once the connection is broken
+			Boolean executeLoop = true;
+			
+			while(executeLoop){
+				dataLine = inData.readLine();
+				
+				if(dataLine != null){
+					System.out.println("[TcpServerThread] Received data: " + dataLine);
+					
+					dataLine.replace("\n", "").replace("\r", "");		//remove newlines, like at the end
+					String[] commandParts = dataLine.split("\\|");		//split the command, separated by "|"
+					
+					if(commandParts.length < 1){
+						System.out.println("[TcpServerThread] Not enough command parts!");
+						continue;
+					}
+					
+					if(Objects.equals(commandParts[0], "ping")){
+						outData.println("pong");
+					}else if(Objects.equals(commandParts[0], "setPSK")){
+						if(commandParts.length < 2){
+							System.out.println("[TcpServerThread] Command \"setPSK\" requires one parameter");
+							continue;
+						}
+						System.out.println("[TcpServerThread] Set PSK to " + commandParts[1]);
+						coapClient.setPsk(commandParts[1]);
+					}else if(Objects.equals(commandParts[0], "coapGet")){
+						if(commandParts.length < 2){
+							System.out.println("[TcpServerThread] Command \"coapGet\" requires one parameter");
+							continue;
+						}
+						
+						String response = coapClient.get(commandParts[1]).getResponseText();
+						outData.println(response);
+					}else if(Objects.equals(commandParts[0], "coapPostJSON")){
+						if(commandParts.length < 3){
+							System.out.println("[TcpServerThread] Command \"coapPostJSON\" requires two parameters");
+							continue;
+						}
+						
+						String response = coapClient.postJSON(commandParts[1], commandParts[2]).getResponseText();
+						outData.println(response);
+					}else if(Objects.equals(commandParts[0], "coapPutJSON")){
+						if(commandParts.length < 3){
+							System.out.println("[TcpServerThread] Command \"coapPutJSON\" requires two parameters");
+							continue;
+						}
+						
+						String response = coapClient.putJSON(commandParts[1], commandParts[2]).getResponseText();
+						outData.println(response);
+					}else if(Objects.equals(commandParts[0], "coapObserveStart")){
+						if(commandParts.length < 2){
+							System.out.println("[TcpServerThread] Command \"coapObserveStart\" requires one parameter");
+							continue;
+						}
+						
+						coapClient.observe(commandParts[1], new CoapHandler(){
+							@Override public void onLoad(CoapResponse response){
+								System.out.println("[TcpServerThread] New state for observed resource " + commandParts[1] + ": " + response.getResponseText());
+								outData.println("observedUpdate|" + commandParts[1] + "|" + response.getResponseText());
+							}
+							
+							@Override public void onError() {
+								System.err.println("[TcpServerThread] Observing failed");
+							}
+						});
+						
+					}
+					
+				}else{
+					//@todo close observed resources
+					//the received dataline was "null" -> probably the remote side closed the socket
+					executeLoop = false;
+					System.out.println("[TcpServerThread] Client socket was probably closed by remote");
+				}
+				
+				if(clientSocket.isClosed()){
+					//the socket was closed somehow else
+					//however -> end this thread
+					executeLoop = false;
+					System.out.println("[TcpServerThread] Client socket was closed");
+				}
+			}
+		}catch(Exception e){
+			System.err.println("[TcpServerThread] Error in client socket, ending this socket: " + e.getMessage());
+		}
+	}
+
+}
