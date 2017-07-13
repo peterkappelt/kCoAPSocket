@@ -73,10 +73,10 @@ public class Coap {
 	 */
 	public void debugOutputEnable(){
 		CaliforniumLogger.initialize();
-		CaliforniumLogger.setLevel(Level.WARNING);
+		CaliforniumLogger.setLevel(Level.INFO);
 		
 		ScandiumLogger.initialize();
-		ScandiumLogger.setLevel(Level.FINER);
+		ScandiumLogger.setLevel(Level.INFO);
 	}
 	
 	/**
@@ -225,5 +225,14 @@ public class Coap {
 		
 		observedPaths.add(relation);
 	}
-
+	
+	/**
+	 * stop observing any resources
+	 */
+	void observeStopAll(){
+		for (CoapObserveRelation observedPath : observedPaths) {
+			observedPath.proactiveCancel();
+		}
+		observedPaths.clear();
+	}
 }

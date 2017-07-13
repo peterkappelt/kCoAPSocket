@@ -3,10 +3,13 @@
  */
 package net.kappelt.kCoAPSocket;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Properties;
 
 /**
  * @author peter
@@ -16,8 +19,11 @@ public class TcpServerThread implements Runnable {
 
 	private int port;
 	
-	public TcpServerThread(int port) {
+	private String coapPSK;
+	
+	public TcpServerThread(int port, String coapPSK) {
 		this.port = port;
+		this.coapPSK = coapPSK;
 	}
 
 	
@@ -35,7 +41,8 @@ public class TcpServerThread implements Runnable {
 			/**
 			 * Coap instance
 			 */
-			Coap coapClient = new Coap("");		//the psk will be set later
+			Coap coapClient = new Coap(coapPSK);
+			coapClient.debugOutputEnable();
 			
 			//accept new connections in an endless loop
 			//@todo I don't think this is a good idea -> what to do, if someone opens a lot of connections to attack?

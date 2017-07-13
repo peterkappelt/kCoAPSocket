@@ -68,8 +68,10 @@ public class TcpServerHandler implements Runnable {
 							System.out.println("[TcpServerThread] Command \"setPSK\" requires one parameter");
 							continue;
 						}
-						System.out.println("[TcpServerThread] Set PSK to " + commandParts[1]);
-						coapClient.setPsk(commandParts[1]);
+						//@todo temporarily disabled -> we load PSK at startup from config
+						System.out.println("[TcpServerThread] Command \"setPSK\" disabled!");
+						//System.out.println("[TcpServerThread] Set PSK to " + commandParts[1]);
+						//coapClient.setPsk(commandParts[1]);
 					}else if(Objects.equals(commandParts[0], "coapGet")){
 						if(commandParts.length < 2){
 							System.out.println("[TcpServerThread] Command \"coapGet\" requires one parameter");
@@ -113,18 +115,16 @@ public class TcpServerHandler implements Runnable {
 						
 					}
 					
-				}else{
-					//@todo close observed resources
+				}
+
+				if((dataLine == null) || clientSocket.isClosed()){
 					//the received dataline was "null" -> probably the remote side closed the socket
+					//additionally, the socket could be closed on the server side, though that isn't implemented here
 					executeLoop = false;
 					System.out.println("[TcpServerThread] Client socket was probably closed by remote");
-				}
-				
-				if(clientSocket.isClosed()){
-					//the socket was closed somehow else
-					//however -> end this thread
-					executeLoop = false;
-					System.out.println("[TcpServerThread] Client socket was closed");
+					
+					coapClient.observeStopAll();
+					System.out.println("[TcpServerThread] Stopped observing all resources");
 				}
 			}
 		}catch(Exception e){
