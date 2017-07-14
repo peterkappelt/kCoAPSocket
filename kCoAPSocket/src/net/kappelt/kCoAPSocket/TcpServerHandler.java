@@ -79,7 +79,7 @@ public class TcpServerHandler implements Runnable {
 						}
 						
 						String response = coapClient.get(commandParts[1]).getResponseText();
-						outData.println(response);
+						outData.println("coapGet|" + commandParts[1] + "|" + response);
 						System.out.println("[TcpServerThread] Command \"coapGet\" on \"" + commandParts[1] + "\" returned \"" + response + "\"");
 					}else if(Objects.equals(commandParts[0], "coapPostJSON")){
 						if(commandParts.length < 3){
@@ -88,7 +88,7 @@ public class TcpServerHandler implements Runnable {
 						}
 						
 						String response = coapClient.postJSON(commandParts[1], commandParts[2]).getResponseText();
-						outData.println(response);
+						outData.println("coapPostJSON|" + commandParts[1] + "|" + response);
 						System.out.println("[TcpServerThread] Command \"coapPostJSON\" on \"" + commandParts[1] + "\" returned \"" + response + "\"");
 					}else if(Objects.equals(commandParts[0], "coapPutJSON")){
 						if(commandParts.length < 3){
@@ -97,7 +97,7 @@ public class TcpServerHandler implements Runnable {
 						}
 						
 						String response = coapClient.putJSON(commandParts[1], commandParts[2]).getResponseText();
-						outData.println(response);
+						outData.println("coapPutJSON|" + commandParts[1] + "|" + response);
 						System.out.println("[TcpServerThread] Command \"coapPutJSON\" on \"" + commandParts[1] + "\" returned \"" + response + "\"");
 					}else if(Objects.equals(commandParts[0], "coapObserveStart")){
 						if(commandParts.length < 2){
