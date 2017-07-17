@@ -119,7 +119,8 @@ public class Coap {
 			Certificate[] trustedCertificates = new Certificate[1];
 			trustedCertificates[0] = trustStore.getCertificate("root");
 
-			DtlsConnectorConfig.Builder builder = new DtlsConnectorConfig.Builder(new InetSocketAddress(0));
+			DtlsConnectorConfig.Builder builder = new DtlsConnectorConfig.Builder();
+			builder.setAddress(new InetSocketAddress(0));
 			builder.setPskStore(new StaticPskStore("Client_identity", psk.getBytes()));
 			builder.setIdentity((PrivateKey)keyStore.getKey("client", KEY_STORE_PASSWORD.toCharArray()),
 					keyStore.getCertificateChain("client"), true);
