@@ -23,13 +23,15 @@ public class TcpServerHandler implements Runnable {
 	 */
 	private Socket clientSocket;
 	private Coap coapClient;
+	private String gatewayAddress;
 	
 	/**
 	 * Construct a new Handler
 	 */
-	public TcpServerHandler(Socket clientSocket, Coap coapClient) {
+	public TcpServerHandler(Socket clientSocket, Coap coapClient, String gatewayAddress) {
 		this.clientSocket = clientSocket;
 		this.coapClient = coapClient;
+		this.gatewayAddress = gatewayAddress;
 	}
 
 	/* (non-Javadoc)
@@ -47,6 +49,9 @@ public class TcpServerHandler implements Runnable {
 			//this is used to stop the thread, once the connection is broken
 			Boolean executeLoop = true;
 			
+			System.out.println("[TcpServerThread] Fetching well-known...");
+			System.out.println("Well Known: " + coapClient.get("coaps://" + gatewayAddress + "/.well-known/core").getResponseText());
+			
 			while(executeLoop){
 				dataLine = inData.readLine();
 				
@@ -63,15 +68,6 @@ public class TcpServerHandler implements Runnable {
 					
 					if(Objects.equals(commandParts[0], "ping")){
 						outData.println("pong");
-					}else if(Objects.equals(commandParts[0], "setPSK")){
-						if(commandParts.length < 2){
-							System.out.println("[TcpServerThread] Command \"setPSK\" requires one parameter");
-							continue;
-						}
-						//@todo temporarily disabled -> we load PSK at startup from config
-						System.out.println("[TcpServerThread] Command \"setPSK\" disabled!");
-						//System.out.println("[TcpServerThread] Set PSK to " + commandParts[1]);
-						//coapClient.setPsk(commandParts[1]);
 					}else if(Objects.equals(commandParts[0], "coapGet")){
 						if(commandParts.length < 2){
 							System.out.println("[TcpServerThread] Command \"coapGet\" requires one parameter");
@@ -114,8 +110,9 @@ public class TcpServerHandler implements Runnable {
 							@Override public void onError() {
 								System.err.println("[TcpServerThread] Observing failed");
 							}
-						});
-						
+						});	
+					}else{
+						System.err.println("[TcpServerThread] Unknown command: " + commandParts[1]);
 					}
 					
 				}

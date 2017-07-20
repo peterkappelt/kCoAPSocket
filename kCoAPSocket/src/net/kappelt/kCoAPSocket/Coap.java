@@ -73,10 +73,10 @@ public class Coap {
 	 */
 	public void debugOutputEnable(){
 		CaliforniumLogger.initialize();
-		CaliforniumLogger.setLevel(Level.INFO);
+		CaliforniumLogger.setLevel(Level.FINE);
 		
 		ScandiumLogger.initialize();
-		ScandiumLogger.setLevel(Level.INFO);
+		ScandiumLogger.setLevel(Level.FINE);
 	}
 	
 	/**
@@ -223,7 +223,7 @@ public class Coap {
 		temp.setObserve();
 		
 		CoapObserveRelation relation = client.observe(temp, handler);
-		
+		System.out.println("[Coap] Starting to observe " + uri);
 		observedPaths.add(relation);
 	}
 	

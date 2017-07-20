@@ -17,10 +17,12 @@ public class TcpServerThread implements Runnable {
 	private int port;
 	
 	private String coapPSK;
+	private String coapAddress;
 	
-	public TcpServerThread(int port, String coapPSK) {
+	public TcpServerThread(int port, String coapPSK, String coapAddress) {
 		this.port = port;
 		this.coapPSK = coapPSK;
+		this.coapAddress = coapAddress;
 	}
 
 	
@@ -33,13 +35,14 @@ public class TcpServerThread implements Runnable {
 			//listen to localhost only
 			@SuppressWarnings("resource")
 			ServerSocket socket = new ServerSocket(port, 0, InetAddress.getLoopbackAddress());
+			//ServerSocket socket = new ServerSocket(port);
 			System.out.println("[TcpServerThread] Binding of socket @ port " + port	+ " successfull.");
 
 			/**
 			 * Coap instance
 			 */
 			Coap coapClient = new Coap(coapPSK);
-			coapClient.debugOutputEnable();
+			//coapClient.debugOutputEnable();
 			
 			//accept new connections in an endless loop
 			//@todo I don't think this is a good idea -> what to do, if someone opens a lot of connections to attack?
@@ -49,7 +52,7 @@ public class TcpServerThread implements Runnable {
 					Socket clientSocket = socket.accept();
 					System.out.println("[TcpServerThread] Connection at port " + port + " opened");
 					
-					Thread threadHandler = new Thread(new TcpServerHandler(clientSocket, coapClient));
+					Thread threadHandler = new Thread(new TcpServerHandler(clientSocket, coapClient, coapAddress));
 					threadHandler.start();
 				}catch (IOException e){
 					System.out.println("[TcpServerThread] New connection request failed");

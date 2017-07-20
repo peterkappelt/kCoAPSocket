@@ -16,12 +16,13 @@ plugins {
 apply plugin: 'java'
 
 apply plugin: 'application'
+apply plugin: 'eclipse'
 
 def getDate() {
     new Date().format('ddMMyyyy')
 }
 
-version='0.0.2-snapshot'
+version='0.0.3-snapshot'
 mainClassName='main.java.kCoapSocketMain'
 
 task wrapper(type: Wrapper) {
