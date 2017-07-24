@@ -22,7 +22,7 @@ def getDate() {
     new Date().format('ddMMyyyy')
 }
 
-version='0.0.3-snapshot'
+version='0.0.4-snapshot'
 mainClassName='main.java.kCoapSocketMain'
 
 task wrapper(type: Wrapper) {

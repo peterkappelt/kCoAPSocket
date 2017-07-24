@@ -19,10 +19,13 @@ public class TcpServerThread implements Runnable {
 	private String coapPSK;
 	private String coapAddress;
 	
-	public TcpServerThread(int port, String coapPSK, String coapAddress) {
+	private Boolean debugEnable;
+	
+	public TcpServerThread(int port, String coapPSK, String coapAddress, Boolean debugEnable) {
 		this.port = port;
 		this.coapPSK = coapPSK;
 		this.coapAddress = coapAddress;
+		this.debugEnable = debugEnable;
 	}
 
 	
@@ -42,7 +45,11 @@ public class TcpServerThread implements Runnable {
 			 * Coap instance
 			 */
 			Coap coapClient = new Coap(coapPSK);
-			//coapClient.debugOutputEnable();
+			
+			//debugEnable is true if user gave -d parameter
+			if(debugEnable){
+				coapClient.debugOutputEnable();
+			}
 			
 			//accept new connections in an endless loop
 			//@todo I don't think this is a good idea -> what to do, if someone opens a lot of connections to attack?
@@ -62,9 +69,11 @@ public class TcpServerThread implements Runnable {
 		    }
 		} catch (IOException e) {
 			System.out.println("[TcpServerThread] Error while binding socket: " + e.getMessage());
+			e.printStackTrace();
 			System.exit(-1);
 		} catch (Exception e) {
 			System.out.println("[TcpServerThread] Caught exception: " + e.getMessage());
+			e.printStackTrace();
 			System.exit(-1);
 		}
 	}

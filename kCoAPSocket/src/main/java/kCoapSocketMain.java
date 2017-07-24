@@ -22,6 +22,9 @@ public class kCoapSocketMain {
 	@Parameter(names = {"-g", "--gateway"}, description = "IP or DNS name of the gateway to connect to, without leading or trailing slash", required=true, help=true)
 	private String coapAddress = "";
 	
+	@Parameter(names = {"-d", "--debug"}, description = "Enable debug output", help = true)
+	private Boolean debug = false;
+	
 	public static void main(String[] args) {
 		kCoapSocketMain main = new kCoapSocketMain();
 		
@@ -34,7 +37,7 @@ public class kCoapSocketMain {
 			System.exit(-1);
 		}
 		
-		System.out.println("kCoAPSocket 0.0.3-snapshot");
+		System.out.println("kCoAPSocket 0.0.4-snapshot");
 		System.out.println();
 		
 		main.startThreadHandler();
@@ -46,7 +49,7 @@ public class kCoapSocketMain {
 			System.out.println();
 		}
 		//run the background socket thread
-		Thread threadHandler = new Thread(new TcpServerThread(port, coapPSK, coapAddress));
+		Thread threadHandler = new Thread(new TcpServerThread(port, coapPSK, coapAddress, debug));
 		threadHandler.start();
 	}
 

@@ -129,6 +129,7 @@ public class TcpServerHandler implements Runnable {
 			}
 		}catch(Exception e){
 			System.err.println("[TcpServerThread] Error in client socket, ending this socket: " + e.getMessage());
+			e.printStackTrace();
 		}
 	}
 
